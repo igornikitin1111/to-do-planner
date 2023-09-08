@@ -7,13 +7,9 @@ class Tasks:
     def __init__(self, name, description, deadline, start_time=datetime.now(), status='in progress'):
         self.name = name
         self.description = description
-        self.start_time = start_time
         self.status = status
         self.deadline = deadline
-
-    def __str__(self) -> str:
-        return(f'{self.name}, {self.status}')
-
+        self.start_time = start_time
 
 class Entries:
     def __init__(self):
@@ -43,7 +39,11 @@ class Entries:
                 
 
 
+
+
+project = Tasks('name', datetime(2023, 9, 9, 11, 00))
 green_team = Entries()
+green_team.add_task(project)
 
 main_layout = [
     [sg.Text('Type task name')],
@@ -57,7 +57,7 @@ window = sg.Window('To-Do List', main_layout)
 
 task_add_layout = [
     [sg.Text("task description"), sg.InputText(key='-DESCRIPTION-')], 
-    [sg.Text("task deadline(YYYY/MM/DD, HH:MM)"), sg.InputText(key='-DEADLINE-')],
+    [sg.Text("task deadline(YYYY/MM/DD, HH/MM)"), sg.InputText(key='-DEADLINE-')],
     [sg.Button('Submit info')]
     ]
 
@@ -71,56 +71,3 @@ table_layout = [
 
 table_window = sg.Window('Tasks list:', table_layout, finalize=True)
 table_window.hide()
-
-while True:
-    main_event, main_values = window.read()
-
-    if main_event == sg.WINDOW_CLOSED or main_event == 'Escape':
-        green_team.save_to_pickle('autosave_todo.pkl')
-        break
-
-    elif main_event == 'Add Task' and main_values['-TASK-']:
-        window.hide()
-        task_add_window.un_hide()
-        task_add_event, task_add_values = task_add_window.read()
-
-        if task_add_event == 'Submit info':
-            task = Tasks(main_values['-TASK-'], task_add_values['-DESCRIPTION-'], task_add_values['-DEADLINE-'])
-            green_team.add_task(task)
-        task_add_window.hide()
-        window.un_hide()
-
-        window['-TASK-LIST-'].update(values=green_team.task_list)
-        window['-TASK-'].update(value='')
-
-
-    elif main_event == 'Delete Task':
-        selected_tasks = main_values['-TASK-LIST-']
-
-        if selected_tasks:
-            selected_task = selected_tasks[0]
-            green_team.task_list.remove(selected_task)
-            window['-TASK-LIST-'].update(values=green_team.task_list)
-
-    elif main_event == 'Save':
-        green_team.save_to_pickle('todo.pkl')
-
-    elif main_event == 'Load':
-        green_team.load_from_pickle('todo.pkl')
-        window['-TASK-LIST-'].update(values=green_team.task_list)
-
-    elif main_event == 'Show as a table':
-        table_values = []
-        for task in green_team.task_list:
-            table_values.append(task)
-        table_window['-TABLE-'].update(values=table_values)
-        window.hide()
-        table_window.un_hide()
-        table_event, table_values = table_window.read()
-
-        if table_event == 'Back':
-            table_window.hide()
-            window.un_hide()
-
-
-window.close()

@@ -2,6 +2,10 @@ import PySimpleGUI as sg
 import pickle
 from datetime import datetime
 
+#padaryt tvarkinga lentele
+#pagerint grafine vartotojo sasaja
+#padaryt funkcionalius deadline ir status pakeitimus
+#klaidu gaudymas
 
 class Tasks:
     def __init__(self, name, description, deadline, start_time=datetime.now(), status='in progress'):
@@ -38,8 +42,16 @@ class Entries:
     @classmethod
     def change_status(cls, task_name, new_status):
         for task in cls.task_list:
-            if cls.name == task_name:
-                cls.status == new_status
+            if task.name == task_name:
+                task.status = new_status
+
+
+    @classmethod
+    def change_deadline(cls, task_name, new_deadline):
+        for task in cls.task_list:
+            if task.name == task_name:
+                task.deadline == new_deadline
+        
                 
 
 
@@ -87,6 +99,8 @@ while True:
         if task_add_event == 'Submit info':
             task = Tasks(main_values['-TASK-'], task_add_values['-DESCRIPTION-'], task_add_values['-DEADLINE-'])
             green_team.add_task(task)
+            task_add_window['-DESCRIPTION-'].update(value='')
+            task_add_window['-DEADLINE-'].update(value='')
         task_add_window.hide()
         window.un_hide()
 

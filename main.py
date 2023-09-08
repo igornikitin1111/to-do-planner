@@ -1,59 +1,9 @@
+from back import Entries, Task
 import PySimpleGUI as sg
-import pickle
 from datetime import datetime
 
-#padaryt tvarkinga lentele
-#pagerint grafine vartotojo sasaja
-#padaryt funkcionalius deadline ir status pakeitimus
-#klaidu gaudymas
-
-class Tasks:
-    def __init__(self, name, description, deadline, start_time=datetime.now(), status='in progress'):
-        self.name = name
-        self.description = description
-        self.start_time = start_time
-        self.status = status
-        self.deadline = deadline
-
-    def __str__(self) -> str:
-        return(f'{self.name}, {self.status}')
-
-
-class Entries:
-    def __init__(self):
-        self.task_list = []
-
-    def add_task(self, task):
-        self.task_list.append(task)
-
-    def delete_task(self, task_name):
-        for task in self.task_list:
-            if task.name == task_name:
-                self.task_list.remove(task)
-
-    def save_to_pickle(self, filename):
-        with open (filename, 'wb') as file:
-            pickle.dump(self.task_list, file)
-            
-    def load_from_pickle(self, filename):
-        with open(filename, 'rb') as file:
-            self.task_list = pickle.load(file)
-
-    @classmethod
-    def change_status(cls, task_name, new_status):
-        for task in cls.task_list:
-            if task.name == task_name:
-                task.status = new_status
-
-
-    @classmethod
-    def change_deadline(cls, task_name, new_deadline):
-        for task in cls.task_list:
-            if task.name == task_name:
-                task.deadline == new_deadline
-        
-                
-
+# padaryt tvarkinga lentele -- Ilya
+# pagerint grafine vartotojo sasaja -- Deivida
 
 green_team = Entries()
 
@@ -97,7 +47,7 @@ while True:
         task_add_event, task_add_values = task_add_window.read()
 
         if task_add_event == 'Submit info':
-            task = Tasks(main_values['-TASK-'], task_add_values['-DESCRIPTION-'], task_add_values['-DEADLINE-'])
+            task = Task(main_values['-TASK-'], task_add_values['-DESCRIPTION-'], task_add_values['-DEADLINE-'])
             green_team.add_task(task)
             task_add_window['-DESCRIPTION-'].update(value='')
             task_add_window['-DEADLINE-'].update(value='')

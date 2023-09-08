@@ -44,6 +44,10 @@ while True:
         table_window['-TABLE-'].update(values=table_values)
         window.hide()
         table_window.un_hide()
+        table_event, table_values = table_window.read()
+        if table_event == 'Back':
+            table_window.hide()
+            window.un_hide()
 
 
 window.close()

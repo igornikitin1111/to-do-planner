@@ -2,6 +2,7 @@ from back import Entries, Task
 import PySimpleGUI as sg
 from datetime import datetime
 
+
 # padaryt tvarkinga lentele -- Ilya
 # pagerint grafine vartotojo sasaja -- Deivida
 
@@ -13,26 +14,18 @@ main_layout = [
     [sg.Listbox(values=[], size=(30, 5), key='-TASK-LIST-')],
     [sg.Button('Delete Task'), sg.Button('Escape'), sg.Button('Show as a table')],
     [sg.Button('Save'), sg.Button('Load')],
-    ]
+]
 
 window = sg.Window('To-Do List', main_layout)
 
 task_add_layout = [
-    [sg.Text("task description"), sg.InputText(key='-DESCRIPTION-')], 
-    [sg.Text("task deadline(YYYY/MM/DD, HH:MM)"), sg.InputText(key='-DEADLINE-')],
+    [sg.Text("Task description"), sg.InputText(key='-DESCRIPTION-')],
+    [sg.Text("Task deadline (YYYY/MM/DD, HH:MM)"), sg.InputText(key='-DEADLINE-')],
     [sg.Button('Submit info')]
-    ]
+]
 
-task_add_window = sg.Window('additional layout', task_add_layout, finalize=True)
+task_add_window = sg.Window('Additional layout', task_add_layout, finalize=True)
 task_add_window.hide()
-
-table_layout = [
-    [sg.Table(values=[], headings=['Task'], auto_size_columns=False, num_rows=10, key='-TABLE-')],
-    [sg.Button('Back')]
-    ]
-
-table_window = sg.Window('Tasks list:', table_layout, finalize=True)
-table_window.hide()
 
 while True:
     main_event, main_values = window.read()
@@ -57,7 +50,6 @@ while True:
         window['-TASK-LIST-'].update(values=green_team.task_list)
         window['-TASK-'].update(value='')
 
-
     elif main_event == 'Delete Task':
         selected_tasks = main_values['-TASK-LIST-']
 
@@ -76,15 +68,38 @@ while True:
     elif main_event == 'Show as a table':
         table_values = []
         for task in green_team.task_list:
-            table_values.append(task)
-        table_window['-TABLE-'].update(values=table_values)
-        window.hide()
-        table_window.un_hide()
-        table_event, table_values = table_window.read()
+            if isinstance(task.deadline, str):
+                try:
+                    task.deadline = datetime.strptime(task.deadline, '%Y/%m/%d, %H:%M')
+                except ValueError:
+                    task.deadline = datetime.strptime(task.deadline, '%Y-%m-%d %H:%M:%S')
+            time_left = task.deadline - datetime.now().replace(microsecond=0)
+            table_values.append([task.name, task.description, str(time_left), task.status])
 
-        if table_event == 'Back':
-            table_window.hide()
-            window.un_hide()
+        table_layout = [
+            [
+                sg.Table(
+                    values=table_values,
+                    headings=['Task name', 'Description', 'Time left to Deadline', 'Status'],
+                    auto_size_columns=True,
+                    num_rows=10,
+                    key='-TABLE-',
+                    text_color='black',
+                    justification='center',
+                )
+            ],
+            [sg.Button('Back')]
+        ]
 
+        table_window = sg.Window('Tasks table', table_layout, finalize=True)
+
+        while True:
+            table_event, table_values = table_window.read()
+
+            if table_event == 'Back' or table_event == sg.WIN_CLOSED:
+                break
+        
+        table_window.close()
+        window.un_hide()
 
 window.close()

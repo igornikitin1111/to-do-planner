@@ -94,13 +94,17 @@ while True:
                 try:
                     task.deadline = datetime.strptime(task.deadline, "%Y/%m/%d, %H:%M")
                 except ValueError:
-                    task.deadline = datetime.strptime(
-                        task.deadline, "%Y-%m-%d %H:%M:%S"
-                    )
+                    try:
+                        task.deadline = datetime.strptime(task.deadline, "%Y/%m/%d %H:%M")
+                    except ValueError:
+                        task.deadline = datetime.strptime(task.deadline, "%Y-%m-%d %H:%M:%S")
+
             time_left = task.deadline - datetime.now().replace(microsecond=0)
-            table_values.append(
-                [task.name, task.description, str(time_left), task.status]
-            )
+            if datetime.now() > task.deadline:
+                task.status = "Late"
+                table_values.append([task.name, task.description, str(time_left), task.status])
+            else:
+                table_values.append([task.name, task.description, str(time_left), task.status])
 
         table_layout = [
             [
@@ -117,18 +121,52 @@ while True:
                     key="-TABLE-",
                     text_color="black",
                     justification="center",
+                    enable_events=True,
+                    row_colors=[(i,'white') for i in range(10)]
                 )
             ],
-            [sg.Button("Back", font=("Helvetica", 14))],
+            [sg.Button("Back", font=("Helvetica", 14)), sg.Button('Change status', font=("Helvetica", 14)) ]
         ]
 
         table_window = sg.Window("Tasks table", table_layout, finalize=True)
+        status_choices = ['in progress', 'done', 'Late']
+        def custom_status_element(key, status):
+            return sg.Combo(values=status_choices, default_value=status, key=key, background_color='white')
 
         while True:
             table_event, table_values = table_window.read()
 
-            if table_event == "Back" or table_event == sg.WIN_CLOSED:
+            if table_event == 'Back' or table_event == sg.WIN_CLOSED:
                 break
+            elif table_event == 'Change status':
+                selected_row = table_values['-TABLE-'][0] 
+
+                if selected_row:
+                    status_element = custom_status_element('-STATUS-', selected_row[3])
+
+                    layout = [
+                        [sg.Text('Select Status:', pad=(0, (0, 10)))],
+                        [status_element],
+                        [sg.Button('OK'), sg.Button('Cancel')]
+                    ]
+
+                    status_window = sg.Window('Select Status', layout, finalize=True, keep_on_top=True)
+
+                    while True:
+                        status_event, status_values = status_window.read()
+
+                        if status_event == sg.WIN_CLOSED or status_event == 'Cancel':
+                            break
+
+                        elif status_event == 'OK':
+                            new_status = status_values['-STATUS-']
+                            green_team.task_list[selected_row[0]].status = new_status
+                            table_values[selected_row[0]][3] = new_status
+                            table_window['-TABLE-'].update(values=table_values)
+
+                            # window['-TABLE-'].update(values=[(task.name, task.description, task.time_left, task.status) for task in green_team.task_list])
+
+                    status_window.close()
 
         table_window.close()
         window.un_hide()

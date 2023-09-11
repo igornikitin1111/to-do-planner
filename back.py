@@ -7,13 +7,10 @@ import logging
 def create_logger(logger_name, log_file):
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
-
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.INFO)
-
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
-
     logger.addHandler(file_handler)
 
     return logger
@@ -77,8 +74,3 @@ class Entries:
             if task.name == task_name:
                 self.new_logger.info(f"Task {task} deadline changed from {task.deadline} to {new_deadline}")
                 task.deadline == new_deadline
-        
-                
-# Del deadline, tai reikia padaryti kad ispradziu gautumeme is vartotojo data (pvz. "1900-01-01, 11:15"),
-# kuri uzsiraso kaip "str" i kintamaja "input_date", ir toliau atliekam veisma (tikriausiai ideti i add_task metoda):
-# deadline = datetime.strftime(input_date, "%Y/%m/%d, %H:%M")

@@ -5,7 +5,7 @@ import logging
 #klaidu gaudymas -- Igor
 
 logging.basicConfig(
-    filename="logger.log", 
+    log_name="logger.log", 
     encoding="UTF-8", 
     level=logging.INFO,
     format='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
@@ -19,7 +19,6 @@ class Task:
         self.start_time = start_time
         self.status = status
         self.deadline = deadline
-
 
     def __str__(self) -> str:
         return(f'{self.name}, {self.status}')
@@ -35,10 +34,14 @@ class Entries:
         logging.info(f"Task created: {Task.__str__()}")
 
     def delete_task(self, task_name):
-        for task in self.task_list:
-            if task.name == task_name:
-                self.task_list.remove(task)
-                logging.info(f"Task deleted: {self.task_list(task)}")
+        try:
+            for task in self.task_list:
+                if task.name == task_name:
+                    self.task_list.remove(task)
+                    logging.info(f"Task deleted: {self.task_list(task)}")
+        except:
+            print(f"Selected task doesn't exist")
+            logging.info(f"Couldn't delete task, task not found")
 
     def save_to_pickle(self, filename):
         with open (filename, 'wb') as file:
@@ -46,9 +49,13 @@ class Entries:
         logging.info(f"Data saved to file: {filename}")
             
     def load_from_pickle(self, filename):
-        with open(filename, 'rb') as file:
-            self.task_list = pickle.load(file)
-        logging.info(f"Data loaded from file: {filename}")
+        try:
+            with open(filename, 'rb') as file:
+                self.task_list = pickle.load(file)
+            logging.info(f"Data loaded from file: {filename}")
+        except:
+            self.task_list = []
+            logging.info(f"File not found, creating empty file")
 
     def change_status(self, task_name, new_status):
         for task in self.task_list:
